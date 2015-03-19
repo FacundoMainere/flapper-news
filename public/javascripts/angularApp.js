@@ -1,4 +1,4 @@
-var app = angular.module('flapperNews', ['ui.router']);
+var app = angular.module('flapperNews', ['ui.router','angularMoment']);
 
 app.config([
 '$stateProvider',
@@ -33,11 +33,13 @@ function($stateProvider, $urlRouterProvider) {
 app.controller('MainCtrl', ['$scope','posts', function($scope, posts){
   $scope.test = 'Hello world!';
   $scope.posts = posts.posts;
+  $scope.order = '-upvotes';
   $scope.addPost = function(){
     if(!$scope.title || $scope.title === '') { return; }
     posts.create({
       title: $scope.title,
       link: $scope.link,
+      time: new Date()
     });
     $scope.title = '';
     $scope.link = '';
@@ -47,6 +49,19 @@ app.controller('MainCtrl', ['$scope','posts', function($scope, posts){
   };
   $scope.decrementUpvotes = function(post) {
     posts.downvote(post);
+  };
+  $scope.setOrder = function (order) {
+    if(order === $scope.order){
+      if(order[0] === '-'){
+        $scope.order = order.substr(1,order.length);
+      }
+      else{
+        $scope.order = '-'.concat(order);
+      }
+    }
+    else{
+      $scope.order = order;
+    }
   };
 }]);
 
@@ -105,6 +120,7 @@ function($scope, posts, post){
     posts.addComment(post._id, {
       body: $scope.body,
       author: 'user',
+      time: new Date()
     }).success(function(comment) {
       $scope.post.comments.push(comment);
     });
